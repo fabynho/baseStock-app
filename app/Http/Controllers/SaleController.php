@@ -48,8 +48,8 @@ class SaleController extends Controller
     public function create(): Response
     {
         return Inertia::render('sales/Create', [
-            'sellers' => SellerResource::collection(Seller::active()->orderBy('name')->get()),
-            'floors' => FloorResource::collection(Floor::active()->orderBy('code')->get()),
+            'sellers' => SellerResource::collection(Seller::active()->orderBy('name')->get())->resolve(),
+            'floors' => FloorResource::collection(Floor::active()->orderBy('code')->get())->resolve(),
             'deliveryTypes' => DeliveryType::options(),
         ]);
     }
@@ -66,7 +66,7 @@ class SaleController extends Controller
         $sale->load(['seller', 'deliverer', 'creator:id,name', 'items.floor']);
 
         return Inertia::render('sales/Show', [
-            'sale' => SaleResource::make($sale),
+            'sale' => SaleResource::make($sale)->resolve(),
             'deliverers' => $sale->isPending()
                 ? DelivererResource::collection(Deliverer::active()->orderBy('name')->get())
                 : [],

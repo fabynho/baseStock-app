@@ -65,3 +65,33 @@ export interface Purchase {
     creator?: { id: number; name: string };
     items?: PurchaseItem[];
 }
+
+export interface EnumOption {
+    value: string;
+    label: string;
+}
+
+export interface SaleItem {
+    id: number;
+    floor_id: number;
+    quantity_m2: string;
+    floor?: Floor;
+}
+
+export interface Sale {
+    id: number;
+    document_number: string;
+    customer_name: string;
+    delivery_type: EnumOption;
+    status: EnumOption; // pending_delivery | delivered | canceled
+    sold_at: string; // ISO 8601
+    delivered_at: string | null;
+    notes: string | null;
+    seller?: Seller;
+    deliverer?: Deliverer | null;
+    creator?: { id: number; name: string };
+    items?: SaleItem[];
+    can_confirm: boolean;
+    can_cancel: boolean;
+}
+

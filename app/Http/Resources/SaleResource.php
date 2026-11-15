@@ -23,13 +23,15 @@ class SaleResource extends JsonResource
             'sold_at' => $this->sold_at?->toIso8601String(),
             'delivered_at' => $this->delivered_at?->toIso8601String(),
             'notes' => $this->notes,
-            'seller' => SellerResource::make($this->whenLoaded('seller')),
+            'seller' => SellerResource::make($this->whenLoaded('seller'))->resolve(),
             'deliverer' => DelivererResource::make($this->whenLoaded('deliverer')),
             'creator' => $this->whenLoaded('creator', fn () => ['id' => $this->creator->id, 'name' => $this->creator->name]),
-            'items' => SaleItemResource::collection($this->whenLoaded('items')),
+            // 'items' => SaleItemResource::collection($this->whenLoaded('items')),
+            'items' => $this->whenLoaded('items'),
             // Flags prontas para a UI (a autorização real continua no backend)
             'can_confirm' => $this->isPending(),
-            'can_cancel' => $this->isPending() && ($request->user()?->isAdmin() ?? false),
+            'can_cancel' => $this->isPending(),
+            // 'can_cancel' => $this->isPending() && ($request->user()?->isAdmin() ?? false),
         ];
     }
 }
