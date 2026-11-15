@@ -37,6 +37,11 @@ const mainNavItems: NavItem[] = [
         title: 'Pisos',
         href: '/floors',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Entradas',
+        href: '/purchases',
+        icon: LayoutGrid,
     }
 ];
 

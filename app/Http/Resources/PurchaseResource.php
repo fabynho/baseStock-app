@@ -22,7 +22,7 @@ class PurchaseResource extends JsonResource
             'received_at' => $this->received_at?->toIso8601String(),
             'notes' => $this->notes,
             'creator' => $this->whenLoaded('creator', fn () => ['id' => $this->creator->id, 'name' => $this->creator->name]),
-            'items' => PurchaseItemResource::collection($this->whenLoaded('items')),
+            'items' => $this->whenLoaded('items'),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -38,5 +39,15 @@ class Purchase extends Model
     public function movements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (!$term) {
+            return $query;
+        }
+
+        return $query->where(fn (Builder $q) => $q->where('document_number', 'like', "%{$term}%")
+            ->orWhere('supplier_name', 'like', "%{$term}%"));
     }
 }

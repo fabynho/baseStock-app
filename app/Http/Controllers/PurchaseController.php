@@ -40,7 +40,7 @@ class PurchaseController extends Controller
     public function create(): Response
     {
         return Inertia::render('purchases/Create', [
-            'floors' => FloorResource::collection(Floor::active()->orderBy('code')->get()),
+            'floors' => FloorResource::collection(Floor::active()->orderBy('code')->get())->resolve(),
         ]);
     }
 
@@ -54,7 +54,9 @@ class PurchaseController extends Controller
     public function show(Purchase $purchase): Response
     {
         return Inertia::render('purchases/Show', [
-            'purchase' => PurchaseResource::make($purchase->load(['creator:id,name', 'items.floor'])),
+            'purchase' => PurchaseResource::make(
+                $purchase->load(['creator:id,name', 'items.floor'])
+            )->resolve(),
         ]);
     }
 }

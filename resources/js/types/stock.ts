@@ -1,5 +1,5 @@
 // Tipos dos props enviados pelos API Resources do BaseStock.
-// Decimais (m²) chegam como string para não perder precisão; formate com lib/format.ts.
+// Decimais (m²) chegam como string para não perder precisão;
 
 /** Coleção paginada: FloorResource::collection($paginator) (sem ->resolve()). */
 export interface Paginated<T> {
@@ -46,4 +46,22 @@ export interface Floor {
     min_stock_alert: string | null;
     below_minimum: boolean;
     is_active: boolean;
+}
+
+export interface PurchaseItem {
+    id: number;
+    floor_id: number;
+    quantity_m2: string;
+    floor?: Floor;
+}
+
+export interface Purchase {
+    id: number;
+    document_number: string;
+    supplier_name: string;
+    document_date: string | null; // YYYY-MM-DD
+    received_at: string; // ISO 8601
+    notes: string | null;
+    creator?: { id: number; name: string };
+    items?: PurchaseItem[];
 }

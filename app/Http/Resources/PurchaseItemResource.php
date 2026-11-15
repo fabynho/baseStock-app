@@ -18,7 +18,7 @@ class PurchaseItemResource extends JsonResource
             'id' => $this->id,
             'floor_id' => $this->floor_id,
             'quantity_m2' => $this->quantity_m2,
-            'floor' => FloorResource::make($this->whenLoaded('floor')),
+            'floor' => FloorResource::make($this->whenLoaded('floor'))->resolve(),
         ];
     }
 }
