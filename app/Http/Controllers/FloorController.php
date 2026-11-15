@@ -42,7 +42,7 @@ class FloorController extends Controller
 
     public function edit(Floor $floor): Response
     {
-        return Inertia::render('floors/Form', ['floor' => FloorResource::make($floor)]);
+        return Inertia::render('floors/Form', ['floor' => FloorResource::make($floor)->resolve()]);
     }
 
     public function update(UpdateFloorRequest $request, Floor $floor): RedirectResponse
