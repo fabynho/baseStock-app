@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FloorSearchInput from '@/components/floors/FloorSearchInput.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -89,6 +90,26 @@ const removeRow = (row: Row) => {
 const onBoxesInput = (row: Row) => {
     const perBox = parseDecimal(floorOf(row)?.m2_per_box);
     row.quantity = row.boxes === '' ? '' : toDecimalInput(parseDecimal(row.boxes) * perBox);
+};
+
+// Trata tanto a troca de piso quanto o clique no botão limpar (X) do FloorSearchInput.
+const onFloorChange = (row: Row) => {
+    const floor = floorOf(row);
+
+    if (!floor) {
+        row.boxes = '';
+        row.quantity = '';
+        return;
+    }
+
+    if (!floor.m2_per_box) {
+        row.boxes = '';
+        return;
+    }
+
+    if (row.boxes !== '') {
+        onBoxesInput(row);
+    }
 };
 
 const onQuantityInput = (row: Row) => {
@@ -190,24 +211,18 @@ const submit = () => {
                         <TableBody>
                             <TableRow v-for="(row, i) in rows" :key="row.key" class="align-top">
                                 <TableCell>
-                                    <Select v-model="row.floor_id" @update:model-value="onBoxesInput(row)">
-                                        <SelectTrigger class="w-full">
-                                            <SelectValue placeholder="Selecione o piso" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem
-                                                v-for="floor in floors"
-                                                :key="floor.id"
-                                                :value="String(floor.id)"
-                                                :disabled="isTaken(floor.id, row) || !hasStock(floor)"
-                                            >
-                                                {{ floor.code }} — {{ floor.description }}
-                                                <span class="text-muted-foreground">
-                                                    ({{ hasStock(floor) ? `disp. ${formatM2(floor.available_stock)} m²` : 'sem estoque' }})
-                                                </span>
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <FloorSearchInput
+                                        v-model="row.floor_id"
+                                        :floors="floors"
+                                        :invalid="Boolean(error(`items.${i}.floor_id`))"
+                                        :is-disabled="(floor) => isTaken(floor.id, row) || !hasStock(floor)"
+                                        :disabled-label="(floor) => (isTaken(floor.id, row) ? 'já adicionado' : 'sem estoque')"
+                                        @update:model-value="onFloorChange(row)"
+                                    >
+                                        <template #meta="{ floor }">
+                                            disp. {{ formatM2(floor.available_stock) }} m²
+                                        </template>
+                                    </FloorSearchInput>
                                     <p v-if="floorOf(row)" class="mt-1 text-xs text-muted-foreground">
                                         Disponível: {{ formatM2(floorOf(row)?.available_stock) }} m² · Físico: {{ formatM2(floorOf(row)?.physical_stock) }} m² · Comprometido:
                                         {{ formatM2(floorOf(row)?.committed_stock) }} m²
