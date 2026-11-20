@@ -68,7 +68,7 @@ class SaleController extends Controller
         return Inertia::render('sales/Show', [
             'sale' => SaleResource::make($sale)->resolve(),
             'deliverers' => $sale->isPending()
-                ? DelivererResource::collection(Deliverer::active()->orderBy('name')->get())
+                ? DelivererResource::collection(Deliverer::active()->orderBy('name')->get())->resolve()
                 : [],
         ]);
     }

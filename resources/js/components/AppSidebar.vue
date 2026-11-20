@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from '@lucide/vue';
+import {
+    ArrowDownToLine,
+    BookOpen,
+    FolderGit2,
+    Layers,
+    LayoutGrid,
+    ShoppingBag,
+    Truck,
+    UserCheck,
+} from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -26,28 +35,28 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Vendedores',
         href: '/sellers',
-        icon: LayoutGrid,
+        icon: UserCheck,
     },
     {
         title: 'Entregadores',
         href: '/deliverers',
-        icon: LayoutGrid,
+        icon: Truck,
     },
     {
         title: 'Pisos',
         href: '/floors',
-        icon: LayoutGrid,
+        icon: Layers,
     },
     {
         title: 'Entradas',
         href: '/purchases',
-        icon: LayoutGrid,
+        icon: ArrowDownToLine,
     },
     {
         title: 'Vendas',
         href: '/sales',
-        icon: LayoutGrid,
-    }
+        icon: ShoppingBag,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
