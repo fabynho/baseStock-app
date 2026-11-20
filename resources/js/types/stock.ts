@@ -106,7 +106,7 @@ export interface StockMovement {
     purchase_id: number | null;
     reason: string | null;
     created_at: string; // ISO 8601
-    floor?: { id: number; code: string; description: string };
+    floor?: { id: number; code: string; description: string; reference: string | null; };
     user?: { id: number; name: string };
 }
 

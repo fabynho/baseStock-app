@@ -19,7 +19,7 @@ class StockMovementController extends Controller
         $f = $request->filters();
 
         $movements = StockMovement::query()
-            ->with(['floor:id,code,description', 'user:id,name'])
+            ->with(['floor:id,code,description,reference', 'user:id,name'])
             ->forFloor($f['floor_id'])
             ->ofType($f['type'])
             ->forDocument($f['document_number'])

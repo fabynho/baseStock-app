@@ -29,6 +29,7 @@ class StockMovementResource extends JsonResource
                 'id' => $this->floor->id,
                 'code' => $this->floor->code,
                 'description' => $this->floor->description,
+                'reference' => $this->floor->reference,
             ]),
             'user' => $this->whenLoaded('user', fn () => ['id' => $this->user->id, 'name' => $this->user->name]),
         ];

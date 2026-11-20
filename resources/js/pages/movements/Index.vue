@@ -205,7 +205,7 @@ const qtyClass = (m: StockMovement) => {
                             <template v-if="m.floor">
                                 <Link :href="floorShow(m.floor.id)" class="font-medium underline-offset-4 hover:underline">{{ m.floor.code }}</Link>
                                 <span class="block max-w-xs truncate text-xs text-muted-foreground" :title="m.floor.description">
-                                    {{ m.floor.description }}
+                                    {{ m.floor.description }} - {{ m.floor.reference }}
                                 </span>
                             </template>
                             <span v-else>—</span>
