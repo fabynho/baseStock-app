@@ -24,7 +24,9 @@ class SaleResource extends JsonResource
             'delivered_at' => $this->delivered_at?->toIso8601String(),
             'notes' => $this->notes,
             'seller' => SellerResource::make($this->whenLoaded('seller'))->resolve(),
-            'deliverer' => DelivererResource::make($this->whenLoaded('deliverer')),
+            'deliverer' => $this->whenLoaded('deliverer', fn ($deliverer) => $deliverer
+                ? DelivererResource::make($deliverer)->resolve()
+                : null),
             'creator' => $this->whenLoaded('creator', fn () => ['id' => $this->creator->id, 'name' => $this->creator->name]),
             // 'items' => SaleItemResource::collection($this->whenLoaded('items')),
             'items' => $this->whenLoaded('items'),

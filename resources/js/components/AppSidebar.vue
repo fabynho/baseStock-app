@@ -61,6 +61,11 @@ const mainNavItems: NavItem[] = [
         title: 'Movimentações',
         href: '/movements',
         icon: BookOpen,
+    },
+    {
+        title: 'Fila de entregas',
+        href: '/deliveres',
+        icon: Truck,
     }
 ];
 

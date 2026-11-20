@@ -36,6 +36,13 @@ defineOptions({
 
 const items = computed(() => props.sale.items ?? []);
 const total = computed(() => items.value.reduce((sum, item) => sum + Number(item.quantity_m2), 0));
+const delivererName = computed(() => {
+    if (props.sale.status.value !== 'delivered' || props.sale.delivery_type.value === 'immediate') {
+        return '—';
+    }
+
+    return props.sale.deliverer?.name ?? '—';
+});
 
 // Entrega futura exige entregador; retirada posterior pelo cliente é opcional.
 const delivererRequired = computed(() => props.sale.delivery_type.value === 'scheduled_delivery');
@@ -110,7 +117,7 @@ const cancelSale = () => {
             </div>
             <div class="rounded-xl border p-4">
                 <dt class="text-sm text-muted-foreground">Entregador</dt>
-                <dd class="font-medium">{{ sale.deliverer?.name ?? '—' }}</dd>
+                <dd class="font-medium">{{ delivererName }}</dd>
             </div>
             <div class="rounded-xl border p-4">
                 <dt class="text-sm text-muted-foreground">Registrado por</dt>
