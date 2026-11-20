@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Purchase extends Model
 {
@@ -49,5 +51,12 @@ class Purchase extends Model
 
         return $query->where(fn (Builder $q) => $q->where('document_number', 'like', "%{$term}%")
             ->orWhere('supplier_name', 'like', "%{$term}%"));
+    }
+
+    protected function supplierName(): Attribute
+    {
+        return Attribute::set(fn (?string $value): ?string => is_string($value) && filled(trim($value))
+            ? Str::upper(trim($value), 'UTF-8')
+            : $value);
     }
 }

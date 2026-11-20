@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 
 class StoreSellerRequest extends FormRequest
 {
@@ -13,6 +14,18 @@ class StoreSellerRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('name')) {
+            $value = $this->input('name');
+            $upperName = is_string($value) && filled(trim($value))
+                ? Str::upper(trim($value), 'UTF-8')
+                : $value;
+
+            $this->merge(['name' => $upperName]);
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 use App\Http\Requests\Concerns\ValidatesQuantities;
@@ -22,6 +23,20 @@ class StoreFloorRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->normalizeDecimalFields('m2_per_box', 'min_stock_alert');
+
+        $upperFields = [];
+        foreach (['reference', 'description', 'brand'] as $field) {
+            if ($this->has($field)) {
+                $value = $this->input($field);
+                $upperFields[$field] = is_string($value) && filled(trim($value))
+                    ? Str::upper(trim($value), 'UTF-8')
+                    : (in_array($field, ['reference', 'brand'], true) ? null : $value);
+            }
+        }
+
+        if ($upperFields !== []) {
+            $this->merge($upperFields);
+        }
     }
 
     protected function uniqueCode(): Unique

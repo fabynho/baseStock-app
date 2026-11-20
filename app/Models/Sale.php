@@ -5,9 +5,11 @@ namespace App\Models;
 use App\Enums\DeliveryType;
 use App\Enums\SaleStatus;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Sale extends Model
 {
@@ -79,5 +81,12 @@ class Sale extends Model
         return $query->where(fn (Builder $q) => $q
             ->where('document_number', 'like', $like)
             ->orWhere('customer_name', 'like', $like));
+    }
+
+    protected function customerName(): Attribute
+    {
+        return Attribute::set(fn (?string $value): ?string => is_string($value) && filled(trim($value))
+            ? Str::upper(trim($value), 'UTF-8')
+            : $value);
     }
 }
