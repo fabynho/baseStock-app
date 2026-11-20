@@ -81,7 +81,7 @@ const total = computed(() => items.value.reduce((sum, item) => sum + Number(item
                 <TableBody>
                     <TableRow v-for="item in items" :key="item.id">
                         <TableCell class="font-medium">{{ item.floor?.code ?? item.floor_id }}</TableCell>
-                        <TableCell>{{ item.floor?.description ?? '—' }}</TableCell>
+                        <TableCell>{{ item.floor?.description ?? '—' }} - {{ item.floor?.reference ?? '—' }}</TableCell>
                         <TableCell class="text-right tabular-nums">{{ formatM2(item.quantity_m2) }}</TableCell>
                     </TableRow>
                 </TableBody>

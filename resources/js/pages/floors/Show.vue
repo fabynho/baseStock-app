@@ -84,11 +84,11 @@ const qtyClass = (m: StockMovement) => {
 </script>
 
 <template>
-    <Head :title="`Piso ${floor.code}`" />
+    <Head :title="`${floor.description}`" />
 
     <div class="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
         <div class="flex items-start justify-between gap-4">
-            <Heading :title="`Piso ${floor.code}`" description="Dados do piso, saldos atuais e histórico de movimentações" />
+            <Heading :title="`${floor.description}`" description="Dados do piso, saldos atuais e histórico de movimentações" />
 
             <div class="flex items-center gap-2">
                 <Button variant="secondary" as-child>
