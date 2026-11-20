@@ -95,3 +95,17 @@ export interface Sale {
     can_cancel: boolean;
 }
 
+export interface StockMovement {
+    id: number;
+    type: EnumOption;
+    quantity_m2: string; // com sinal apenas em manual_adjustment
+    physical_balance_after: string;
+    committed_balance_after: string;
+    document_number: string | null;
+    sale_id: number | null;
+    purchase_id: number | null;
+    reason: string | null;
+    created_at: string; // ISO 8601
+    user?: { id: number; name: string };
+}
+

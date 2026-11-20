@@ -28,7 +28,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
     // Cadastros
-    Route::resource('floors', FloorController::class)->except(['show', 'destroy']);
+    Route::resource('floors', FloorController::class)->except(['destroy']);
     Route::resource('sellers', SellerController::class)->only(['index', 'store', 'update']);
     Route::resource('deliverers', DelivererController::class)->only(['index', 'store', 'update']);
 

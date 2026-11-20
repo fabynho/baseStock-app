@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StockMovementType;
+use App\Http\Requests\FloorMovementsFilterRequest;
 use App\Http\Requests\StockPositionFilterRequest;
 use App\Http\Requests\StoreFloorRequest;
 use App\Http\Requests\UpdateFloorRequest;
 use App\Http\Resources\FloorResource;
+use App\Http\Resources\StockMovementResource;
 use App\Models\Floor;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -38,6 +41,24 @@ class FloorController extends Controller
         Floor::create($request->validated());
 
         return to_route('floors.index')->with('success', 'Piso cadastrado.');
+    }
+
+    public function show(FloorMovementsFilterRequest $request, Floor $floor): Response
+    {
+        $kind = $request->kind();
+
+        $movements = $floor->movements()
+            ->with('user:id,name')
+            ->when($kind, fn ($q, $k) => $q->whereIn('type', StockMovementType::valuesForKind($k)))
+            ->latest('id')
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('floors/Show', [
+            'floor' => FloorResource::make($floor)->resolve(),
+            'movements' => StockMovementResource::collection($movements),
+            'filters' => ['kind' => $kind],
+        ]);
     }
 
     public function edit(Floor $floor): Response

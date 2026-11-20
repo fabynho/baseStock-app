@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatM2 } from '@/lib/format';
-import { create, edit, index } from '@/routes/floors';
+import { create, edit, index, show } from '@/routes/floors';
 import type { Floor, Paginated } from '@/types/stock';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Pencil, Plus, Search } from '@lucide/vue';
@@ -80,7 +80,9 @@ watch(search, (value) => {
                     </TableRow>
 
                     <TableRow v-for="floor in floors.data" :key="floor.id" :class="{ 'text-muted-foreground': !floor.is_active }">
-                        <TableCell class="font-medium">{{ floor.code }}</TableCell>
+                        <TableCell class="font-medium">
+                            <Link :href="show(floor.id)" class="underline-offset-4 hover:underline">{{ floor.code }}</Link>
+                        </TableCell>
                         <TableCell>
                             {{ floor.description }}
                             <span v-if="floor.reference" class="block text-xs text-muted-foreground">Ref.: {{ floor.reference }}</span>

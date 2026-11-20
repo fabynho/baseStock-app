@@ -26,4 +26,17 @@ enum StockMovementType: string
             self::ManualAdjustment => 'Ajuste manual',
         };
     }
+
+    /** Agrupamento usado nos filtros de histórico: in | out | commit. */
+    public static function valuesForKind(string $kind): array
+    {
+        $types = match ($kind) {
+            'in'     => [self::PurchaseIn, self::CustomerReturnIn],
+            'out'    => [self::SaleDeliveryOut, self::BreakageOut],
+            'commit' => [self::SaleReservation, self::SaleCancelRelease],
+            default  => [],
+        };
+
+        return array_map(fn (self $t) => $t->value, $types);
+    }
 }
