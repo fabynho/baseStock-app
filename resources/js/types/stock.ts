@@ -106,6 +106,15 @@ export interface StockMovement {
     purchase_id: number | null;
     reason: string | null;
     created_at: string; // ISO 8601
+    floor?: { id: number; code: string; description: string };
     user?: { id: number; name: string };
+}
+
+export interface FloorOption {
+    id: number;
+    code: string;
+    reference: string | null;
+    description: string;
+    brand: string | null;
 }
 

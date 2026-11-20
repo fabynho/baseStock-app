@@ -57,6 +57,11 @@ const mainNavItems: NavItem[] = [
         href: '/sales',
         icon: ShoppingBag,
     },
+    {
+        title: 'Movimentações',
+        href: '/movements',
+        icon: BookOpen,
+    }
 ];
 
 const footerNavItems: NavItem[] = [
