@@ -49,6 +49,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Kardex
     Route::get('movements', [StockMovementController::class, 'index'])->name('movements.index');
 
+    // Estoque
+    Route::get('stock', [StockPositionController::class, 'index'])->name('stock.index');
+
     // Somente admin
     Route::middleware('admin')->group(function () {
         Route::resource('users', UserController::class)->except(['show', 'destroy']);

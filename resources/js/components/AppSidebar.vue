@@ -9,6 +9,7 @@ import {
     ShoppingBag,
     Truck,
     UserCheck,
+    Boxes
 } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -66,7 +67,12 @@ const mainNavItems: NavItem[] = [
         title: 'Fila de entregas',
         href: '/deliveres',
         icon: Truck,
-    }
+    },
+    {
+        title: 'Posição de Estoque',
+        href: '/stock',
+        icon: Boxes,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

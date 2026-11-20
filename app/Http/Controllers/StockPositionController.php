@@ -25,7 +25,7 @@ class StockPositionController extends Controller
             ->paginate(50)
             ->withQueryString();
 
-        return Inertia::render('dashboard/Index', [
+        return Inertia::render('stock/Index', [
             'floors' => FloorResource::collection($floors),
             'filters' => $f,
             'stats' => [
