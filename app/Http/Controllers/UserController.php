@@ -37,7 +37,7 @@ class UserController extends Controller
     public function edit(User $user): Response
     {
         return Inertia::render('users/Form', [
-            'user' => UserResource::make($user),
+            'user' => UserResource::make($user)->resolve(),
             'roles' => UserRole::options(),
         ]);
     }

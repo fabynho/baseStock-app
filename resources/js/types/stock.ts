@@ -118,3 +118,12 @@ export interface FloorOption {
     brand: string | null;
 }
 
+export interface ManagedUser {
+    id: number;
+    name: string;
+    email: string;
+    role: EnumOption; // admin | user
+    is_active: boolean;
+    is_self: boolean;
+}
+

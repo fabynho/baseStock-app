@@ -33,7 +33,7 @@ class SaleResource extends JsonResource
             // Flags prontas para a UI (a autorização real continua no backend)
             'can_confirm' => $this->isPending(),
             'can_cancel' => $this->isPending(),
-            // 'can_cancel' => $this->isPending() && ($request->user()?->isAdmin() ?? false),
+            // 'can_cancel' => $this->isPending() && ($request->user()->isAdmin()),
         ];
     }
 }
