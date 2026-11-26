@@ -16,7 +16,7 @@ class BreakageController extends Controller
     public function create(): Response
     {
         return Inertia::render('breakages/Create', [
-            'floors' => FloorResource::collection(Floor::active()->orderBy('code')->get()),
+            'floors' => FloorResource::collection(Floor::active()->orderBy('code')->get())->resolve(),
         ]);
     }
 

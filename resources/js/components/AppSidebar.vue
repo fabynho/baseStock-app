@@ -73,6 +73,11 @@ const mainNavItems: NavItem[] = [
         href: '/stock',
         icon: Boxes,
     },
+    {
+        title: 'Quebras / Avarias',
+        href: '/breakages/create',
+        icon: FolderGit2,
+    }
 ];
 
 const footerNavItems: NavItem[] = [
