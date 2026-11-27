@@ -86,11 +86,7 @@ const footerNavItems: NavItem[] = [
         href: '/users',
         icon: UserCheck,
     },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
+
 ];
 </script>
 
