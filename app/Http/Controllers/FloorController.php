@@ -70,6 +70,6 @@ class FloorController extends Controller
     {
         $floor->update($request->validated());
 
-        return to_route('floors.index')->with('success', 'Piso atualizado.');
+        return to_route('floors.show', $floor)->with('success', 'Piso atualizado.');
     }
 }

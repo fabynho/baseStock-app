@@ -3,6 +3,7 @@ import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import SaleStatusBadge from '@/components/sales/SaleStatusBadge.vue';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,13 +11,14 @@ import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, Table
 import { formatDateTime, formatM2 } from '@/lib/format';
 import { cancel, create, deliver, index } from '@/routes/sales';
 import { create as createReturn } from '@/routes/customer-returns';
-import type { Deliverer, Sale } from '@/types/stock';
+import type { CustomerReturn, Deliverer, Sale } from '@/types/stock';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Ban, LoaderCircle, PackageCheck, Undo2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
     sale: Sale;
+    returns: CustomerReturn[];
     deliverers: Deliverer[]; // vazio quando a venda não está pendente
 }>();
 
@@ -44,6 +46,9 @@ const delivererName = computed(() => {
 
     return props.sale.deliverer?.name ?? '—';
 });
+const totalOfReturn = (ret: CustomerReturn) => (ret.items ?? []).reduce((sum, item) => sum + Number(item.quantity_m2), 0);
+const returnedTotal = computed(() => props.returns.reduce((sum, ret) => sum + totalOfReturn(ret), 0));
+const returnedPercent = computed(() => (total.value > 0 ? Math.min(100, (returnedTotal.value / total.value) * 100) : 0));
 
 // Entrega futura exige entregador; retirada posterior pelo cliente é opcional.
 const delivererRequired = computed(() => props.sale.delivery_type.value === 'scheduled_delivery');
@@ -164,6 +169,65 @@ const cancelSale = () => {
             <p class="whitespace-pre-line">{{ sale.notes }}</p>
         </div>
 
+        <!-- Devoluções desta venda -->
+        <div v-if="returns.length > 0" class="max-w-4xl space-y-4 rounded-xl border p-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h2 class="flex items-center gap-2 font-medium">
+                        <Undo2 class="h-4 w-4" />
+                        Devoluções
+                        <Badge variant="secondary">{{ returns.length }}</Badge>
+                    </h2>
+                    <p class="text-sm text-muted-foreground">
+                        Devolvido {{ formatM2(returnedTotal) }} m² de {{ formatM2(total) }} m² vendidos
+                        <template v-if="returnedTotal >= total">· venda totalmente devolvida</template>
+                    </p>
+                </div>
+
+                <Button v-if="sale.can_return && returnedTotal < total" variant="outline" size="sm" as-child>
+                    <Link :href="createReturn({ query: { sale: sale.id } })">
+                        <Undo2 class="h-4 w-4" />
+                        Nova devolução
+                    </Link>
+                </Button>
+            </div>
+
+            <div class="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" :aria-valuenow="Math.round(returnedPercent)" aria-valuemin="0" aria-valuemax="100">
+                <div class="h-full rounded-full bg-amber-500 transition-all" :style="{ width: `${returnedPercent}%` }" />
+            </div>
+
+            <div v-for="ret in returns" :key="ret.id" class="space-y-3 rounded-lg border p-4">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                        <p class="font-medium">{{ ret.document_number }}</p>
+                        <p class="text-xs text-muted-foreground">{{ formatDateTime(ret.returned_at) }} · {{ ret.creator?.name ?? '—' }}</p>
+                    </div>
+                    <p class="font-semibold tabular-nums">{{ formatM2(totalOfReturn(ret)) }} m²</p>
+                </div>
+
+                <p class="text-sm whitespace-pre-line"><span class="text-muted-foreground">Motivo:</span> {{ ret.reason }}</p>
+
+                <div class="rounded-lg border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead class="w-32">Código</TableHead>
+                                <TableHead>Descrição</TableHead>
+                                <TableHead class="w-40 text-right">Devolvido (m²)</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-for="item in ret.items ?? []" :key="item.id">
+                                <TableCell class="font-medium">{{ item.floor?.code ?? item.floor_id }}</TableCell>
+                                <TableCell>{{ item.floor?.description ?? '—' }} - {{ item.floor?.reference ?? '—' }}</TableCell>
+                                <TableCell class="text-right tabular-nums">{{ formatM2(item.quantity_m2) }}</TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+        </div>
+
         <!-- Confirmar entrega / retirada -->
         <form v-if="sale.can_confirm" class="max-w-4xl space-y-4 rounded-xl border p-4" @submit.prevent="confirmDelivery">
             <div>
@@ -197,7 +261,7 @@ const cancelSale = () => {
         </form>
 
         <p v-if="sale.status.value === 'delivered'" class="max-w-4xl text-sm text-muted-foreground">
-            Venda já entregue não pode ser cancelada. Para devolver o piso ao estoque, registre uma devolução de cliente.
+            Venda já entregue não pode ser cancelada. Para devolver o piso ao estoque, use “Registrar devolução”.
         </p>
 
         <!-- Cancelar (somente admin, venda pendente) -->

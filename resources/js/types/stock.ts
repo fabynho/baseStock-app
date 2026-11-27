@@ -143,3 +143,21 @@ export interface ReturnableSale {
     items: ReturnableItem[];
 }
 
+export interface CustomerReturnItem {
+    id: number;
+    floor_id: number;
+    quantity_m2: string;
+    floor: { id: number; code: string; description: string; reference: string | null } | null;
+}
+
+export interface CustomerReturn {
+    id: number;
+    document_number: string;
+    sale_id: number | null;
+    customer_name: string | null;
+    reason: string;
+    returned_at: string; // ISO 8601
+    creator?: { id: number; name: string };
+    items?: CustomerReturnItem[];
+}
+

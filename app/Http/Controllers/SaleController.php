@@ -11,6 +11,7 @@ use App\Http\Resources\DelivererResource;
 use App\Http\Resources\FloorResource;
 use App\Http\Resources\SaleResource;
 use App\Http\Resources\SellerResource;
+use App\Http\Resources\CustomerReturnResource;
 use App\Models\Deliverer;
 use App\Models\Floor;
 use App\Models\Sale;
@@ -63,10 +64,20 @@ class SaleController extends Controller
 
     public function show(Sale $sale): Response
     {
-        $sale->load(['seller', 'deliverer', 'creator:id,name', 'items.floor']);
+        $sale->load([
+            'seller',
+            'deliverer',
+            'creator:id,name',
+            'items.floor',
+            'returns' => fn ($q) => $q
+                ->with(['creator:id,name', 'items.floor'])
+                ->latest('returned_at')
+                ->latest('id'),
+        ]);
 
         return Inertia::render('sales/Show', [
             'sale' => SaleResource::make($sale)->resolve(),
+            'returns' => CustomerReturnResource::collection($sale->returns)->resolve(),
             'deliverers' => $sale->isPending()
                 ? DelivererResource::collection(Deliverer::active()->orderBy('name')->get())->resolve()
                 : [],
