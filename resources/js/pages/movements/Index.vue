@@ -79,7 +79,7 @@ const clearFilters = () => {
 };
 
 // Sinal/cor por tipo: entrada (+), saída (−), reserva/liberação (âmbar), ajuste (sinal do valor).
-const effectOf = (m: StockMovement): 'in' | 'out' | 'commit' | 'adjust' => {
+const effectOf = (m: StockMovement): 'in' | 'out' | 'commit' | 'release' | 'adjust' => {
     switch (m.type.value) {
         case 'purchase_in':
         case 'customer_return_in':
@@ -88,8 +88,9 @@ const effectOf = (m: StockMovement): 'in' | 'out' | 'commit' | 'adjust' => {
         case 'breakage_out':
             return 'out';
         case 'sale_reservation':
-        case 'sale_cancel_release':
             return 'commit';
+        case 'sale_cancel_release':
+            return 'release';    
         default:
             return 'adjust';
     }
@@ -98,14 +99,31 @@ const effectOf = (m: StockMovement): 'in' | 'out' | 'commit' | 'adjust' => {
 const isPositive = (m: StockMovement) => {
     const effect = effectOf(m);
     if (effect === 'adjust') return Number(m.quantity_m2) > 0;
-    return effect === 'in' || m.type.value === 'sale_reservation';
+    return effect === 'in';
 };
 
-const qtyLabel = (m: StockMovement) => `${isPositive(m) ? '+' : '−'}${formatM2(String(m.quantity_m2).replace('-', ''))}`;
+const qtyLabel = (m: StockMovement) => {
+    const abs = formatM2(String(m.quantity_m2).replace('-', ''));
+    const effect = effectOf(m);
+
+    if (effect === 'commit' || effect === 'release') return abs;
+    if (effect === 'out') return `−${abs}`;
+
+    return `${isPositive(m) ? '+' : '−'}${abs}`;
+}
 
 const qtyClass = (m: StockMovement) => {
-    if (effectOf(m) === 'commit') return 'text-amber-600 dark:text-amber-400';
-    return isPositive(m) ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400';
+    switch (effectOf(m)) {
+        case 'in':
+        case 'release':
+            return 'text-emerald-600 dark:text-emerald-400';
+        case 'out':
+            return 'text-red-600 dark:text-red-400';
+        case 'commit':
+            return 'text-amber-600 dark:text-amber-400';
+        default:
+            return isPositive(m) ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400';
+    }
 };
 </script>
 

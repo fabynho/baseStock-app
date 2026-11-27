@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatDateTime, formatM2 } from '@/lib/format';
 import { cancel, create, deliver, index } from '@/routes/sales';
+import { create as createReturn } from '@/routes/customer-returns';
 import type { Deliverer, Sale } from '@/types/stock';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { Ban, LoaderCircle, PackageCheck } from '@lucide/vue';
+import { Ban, LoaderCircle, PackageCheck, Undo2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
@@ -48,7 +49,7 @@ const delivererName = computed(() => {
 const delivererRequired = computed(() => props.sale.delivery_type.value === 'scheduled_delivery');
 
 // ---- Confirmar entrega / retirada (baixa o comprometido e o físico) ----
-const deliverForm = useForm({ deliverer_id: delivererRequired.value ? '' : 'none' });
+const deliverForm = useForm({ deliverer_id: delivererRequired.value ? '' : 'none', stock: '' });
 
 const confirmDelivery = () => {
     deliverForm
@@ -60,7 +61,7 @@ const confirmDelivery = () => {
 
 // ---- Cancelar venda pendente (admin): libera o comprometido ----
 const cancelOpen = ref(false);
-const cancelForm = useForm({ reason: '' });
+const cancelForm = useForm({ reason: '', stock: '' });
 
 const cancelSale = () => {
     cancelForm.post(cancel.url(props.sale.id), {
@@ -86,6 +87,12 @@ const cancelSale = () => {
                 </Button>
                 <Button as-child>
                     <Link :href="create()">Nova venda</Link>
+                </Button>
+                <Button v-if="sale.can_return" variant="outline" as-child>
+                    <Link :href="createReturn({ query: { sale: sale.id } })">
+                        <Undo2 class="h-4 w-4" />
+                        Registrar devolução
+                    </Link>
                 </Button>
             </div>
         </div>

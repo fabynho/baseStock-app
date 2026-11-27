@@ -9,6 +9,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use App\Exceptions\StockException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -34,4 +35,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->render(fn (StockException $e, Request $request) => back()->withErrors(['stock' => $e->getMessage()]));
     })->create();

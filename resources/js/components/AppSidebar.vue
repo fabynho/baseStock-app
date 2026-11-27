@@ -77,6 +77,11 @@ const mainNavItems: NavItem[] = [
         title: 'Quebras / Avarias',
         href: '/breakages/create',
         icon: FolderGit2,
+    },
+    {
+        title: 'Devoluções',
+        href: '/customer-returns/create',
+        icon: FolderGit2,
     }
 ];
 
