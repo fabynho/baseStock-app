@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import {
     ArrowDownToLine,
     BookOpen,
     FolderGit2,
     Layers,
     LayoutGrid,
+    PackageX,
     ShoppingBag,
     Truck,
     UserCheck,
-    Boxes
+    Boxes,
+    Undo2,
 } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -76,23 +79,31 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Quebras / Avarias',
         href: '/breakages/create',
-        icon: FolderGit2,
+        icon: PackageX,
     },
     {
         title: 'Devoluções',
         href: '/customer-returns/create',
-        icon: FolderGit2,
+        icon: Undo2,
     }
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Usuários',
-        href: '/users',
-        icon: UserCheck,
-    },
+const page = usePage();
+const isAdmin = computed(() => page.props.auth.user?.role === 'admin');
 
-];
+const footerNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [];
+
+    if (isAdmin.value) {
+        items.push({
+            title: 'Usuários',
+            href: '/users',
+            icon: UserCheck,
+        });
+    }
+
+    return items;
+});
 </script>
 
 <template>
@@ -114,7 +125,7 @@ const footerNavItems: NavItem[] = [
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
+            <NavFooter v-if="footerNavItems.length > 0" :items="footerNavItems" />
             <NavUser />
         </SidebarFooter>
     </Sidebar>

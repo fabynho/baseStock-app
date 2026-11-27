@@ -12,7 +12,7 @@ import { formatDateTime, formatM2 } from '@/lib/format';
 import { cancel, create, deliver, index } from '@/routes/sales';
 import { create as createReturn } from '@/routes/customer-returns';
 import type { CustomerReturn, Deliverer, Sale } from '@/types/stock';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { Ban, LoaderCircle, PackageCheck, Undo2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
@@ -36,6 +36,9 @@ defineOptions({
         ],
     },
 });
+
+const page = usePage();
+const isAdmin = computed(() => page.props.auth.user?.role === 'admin');
 
 const items = computed(() => props.sale.items ?? []);
 const total = computed(() => items.value.reduce((sum, item) => sum + Number(item.quantity_m2), 0));
@@ -265,7 +268,7 @@ const cancelSale = () => {
         </p>
 
         <!-- Cancelar (somente admin, venda pendente) -->
-        <div v-if="sale.can_cancel" class="max-w-4xl">
+        <div v-if="sale.can_cancel && isAdmin" class="max-w-4xl">
             <Button variant="destructive" @click="cancelOpen = true">
                 <Ban class="h-4 w-4" />
                 Cancelar venda
