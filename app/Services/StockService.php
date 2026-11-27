@@ -6,6 +6,8 @@ use App\Enums\DeliveryType;
 use App\Enums\SaleStatus;
 use App\Enums\StockMovementType;
 use App\Exceptions\StockException;
+use App\Models\CustomerReturn;
+use App\Models\CustomerReturnItem;
 use App\Models\Deliverer;
 use App\Models\Floor;
 use App\Models\Purchase;
@@ -101,28 +103,140 @@ class StockService
         });
     }
 
-    public function registerCustomerReturn(
-        Floor|int $floor,
-        string|int|float $quantityM2,
-        User $user,
-        string $documentNumber,
-        string $reason,
-    ): StockMovement {
-        $this->requireFilled($documentNumber, 'Número do documento');
-        $this->requireFilled($reason, 'Motivo');
-        $qty = $this->positive($quantityM2);
+    /**
+     * Saldo devolvível por piso de uma venda: vendido − já devolvido.
+     *
+     * @return array<int, array{sold: BigDecimal, returned: BigDecimal, returnable: BigDecimal}> indexado por floor_id
+     */
+    public function returnSummary(Sale $sale): array
+    {
+        $returned = CustomerReturnItem::query()
+            ->whereHas('customerReturn', fn ($q) => $q->where('sale_id', $sale->id))
+            ->get()
+            ->groupBy('floor_id');
 
-        return DB::transaction(fn () => $this->apply(
-            $this->lockFloor($floor),
-            StockMovementType::CustomerReturnIn,
-            $qty,
-            physicalDelta: $qty,
-            committedDelta: $this->zero(),
-            user: $user,
-            documentNumber: $documentNumber,
-            reason: $reason,
-        ));
+        $summary = [];
+
+        foreach ($sale->items()->get() as $item) {
+            $sold = $this->decimal($item->quantity_m2);
+
+            $already = $returned->get($item->floor_id, collect())
+                ->reduce(fn (BigDecimal $carry, CustomerReturnItem $r) => $carry->plus($this->decimal($r->quantity_m2)), $this->zero());
+
+            $summary[$item->floor_id] = [
+                'sold' => $sold,
+                'returned' => $already,
+                'returnable' => $sold->minus($already)->toScale(self::SCALE),
+            ];
+        }
+
+        return $summary;
     }
+
+    /**
+     * Devolução de cliente, avulsa (sem sale_id) ou vinculada a uma venda ENTREGUE.
+     * Vinculada: só pisos da venda e quantidade <= vendido − já devolvido.
+     *
+     * @param array{
+     *     document_number: string,
+     *     reason: string,
+     *     sale_id?: ?int,
+     *     customer_name?: ?string,
+     * } $data
+     * @param array<int, array{floor_id: int, quantity_m2: string|int|float}> $items
+     */
+    public function createCustomerReturn(array $data, array $items, User $user): CustomerReturn
+    {
+        $this->requireFilled($data['document_number'] ?? null, 'Número do documento');
+        $this->requireFilled($data['reason'] ?? null, 'Motivo da devolução');
+
+        $lines = $this->consolidateItems($items);
+        $saleId = $data['sale_id'] ?? null;
+
+        return DB::transaction(function () use ($data, $lines, $saleId, $user) {
+            $sale = null;
+            $summary = [];
+
+            if ($saleId) {
+                // Trava a venda primeiro: serializa devoluções concorrentes da mesma venda.
+                $sale = $this->lockSale($saleId);
+
+                if (! $sale->isDelivered()) {
+                    throw StockException::saleNotDelivered($sale);
+                }
+
+                $summary = $this->returnSummary($sale);
+            }
+
+            $floors = $this->lockFloors(array_keys($lines));
+
+            if ($sale) {
+                foreach ($lines as $floorId => $qty) {
+                    if (! isset($summary[$floorId])) {
+                        throw StockException::floorNotInSale($floors[$floorId], $sale);
+                    }
+
+                    if ($qty->isGreaterThan($summary[$floorId]['returnable'])) {
+                        throw StockException::returnExceedsSold($floors[$floorId], $qty, $summary[$floorId]['returnable']);
+                    }
+                }
+            }
+
+            $return = CustomerReturn::create([
+                'document_number' => trim($data['document_number']),
+                'sale_id' => $sale?->id,
+                'customer_name' => $sale?->customer_name ?? ($data['customer_name'] ?? null),
+                'reason' => trim($data['reason']),
+                'returned_at' => now(),
+                'created_by' => $user->id,
+            ]);
+
+            foreach ($lines as $floorId => $qty) {
+                CustomerReturnItem::create([
+                    'customer_return_id' => $return->id,
+                    'floor_id' => $floorId,
+                    'quantity_m2' => (string) $qty,
+                ]);
+
+                $this->apply(
+                    $floors[$floorId],
+                    StockMovementType::CustomerReturnIn,
+                    $qty,
+                    physicalDelta: $qty,
+                    committedDelta: $this->zero(),
+                    user: $user,
+                    documentNumber: $return->document_number,
+                    saleId: $sale?->id,
+                    reason: $return->reason,
+                );
+            }
+
+            return $return->load('items.floor');
+        });
+    }
+
+    // public function registerCustomerReturn(
+    //     Floor|int $floor,
+    //     string|int|float $quantityM2,
+    //     User $user,
+    //     string $documentNumber,
+    //     string $reason,
+    // ): StockMovement {
+    //     $this->requireFilled($documentNumber, 'Número do documento');
+    //     $this->requireFilled($reason, 'Motivo');
+    //     $qty = $this->positive($quantityM2);
+
+    //     return DB::transaction(fn () => $this->apply(
+    //         $this->lockFloor($floor),
+    //         StockMovementType::CustomerReturnIn,
+    //         $qty,
+    //         physicalDelta: $qty,
+    //         committedDelta: $this->zero(),
+    //         user: $user,
+    //         documentNumber: $documentNumber,
+    //         reason: $reason,
+    //     ));
+    // }
 
     // =====================================================================
     // Fluxo C — Quebras e avarias

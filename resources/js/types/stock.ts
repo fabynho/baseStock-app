@@ -93,6 +93,7 @@ export interface Sale {
     items?: SaleItem[];
     can_confirm: boolean;
     can_cancel: boolean;
+    can_return: boolean;
 }
 
 export interface StockMovement {
@@ -125,5 +126,20 @@ export interface ManagedUser {
     role: EnumOption; // admin | user
     is_active: boolean;
     is_self: boolean;
+}
+
+export interface ReturnableItem {
+    floor: { id: number; code: string; description: string; reference: string | null };
+    sold: string;
+    returned: string;
+    returnable: string;
+}
+
+export interface ReturnableSale {
+    id: number;
+    document_number: string;
+    customer_name: string;
+    delivered_at: string | null;
+    items: ReturnableItem[];
 }
 
