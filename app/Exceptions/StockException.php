@@ -81,4 +81,24 @@ class StockException extends DomainException
     {
         return new self('Entregador inválido ou inativo.');
     }
+
+    public static function saleNotDelivered(Sale $sale): self
+    {
+        return new self("A venda {$sale->document_number} não foi entregue (status atual: {$sale->status->label()}). Só é possível devolver vendas entregues.");
+    }
+
+    public static function floorNotInSale(Floor $floor, Sale $sale): self
+    {
+        return new self("O piso {$floor->code} não consta na venda {$sale->document_number}.");
+    }
+
+    public static function returnExceedsSold(Floor $floor, BigDecimal $requested, BigDecimal $returnable): self
+    {
+        return new self(sprintf(
+            'Quantidade acima do saldo devolvível da venda para o piso %s: solicitado %s m², disponível para devolução %s m².',
+            $floor->code,
+            $requested->toScale(4),
+            $returnable->toScale(4),
+        ));
+    }
 }

@@ -61,9 +61,19 @@ class Sale extends Model
         return $this->hasMany(StockMovement::class);
     }
 
+    public function returns(): HasMany
+    {
+        return $this->hasMany(CustomerReturn::class);
+    }
+
     public function isPending(): bool
     {
         return $this->status === SaleStatus::PendingDelivery;
+    }
+
+    public function isDelivered(): bool
+    {
+        return $this->status === SaleStatus::Delivered;
     }
 
     public function scopePendingDelivery(Builder $query): Builder
